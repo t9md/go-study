@@ -8,7 +8,12 @@ import (
 )
 
 func main() {
+	var yes stringutil.Hogehoge = 77
 	hn, _ := os.Hostname()
-	fmt.Printf("Hello, world. my hostname is %s\n", hn)
+	pf := fmt.Printf
+	p := fmt.Println
+	p(yes)
+	p(stringutil.CallPrivateType())
+	pf("Hello, world. my hostname is %s\n", hn)
 	fmt.Printf(stringutil.Reverse("!oG ,olleH"))
 }
