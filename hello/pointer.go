@@ -9,11 +9,12 @@ type person struct {
 }
 
 func main() {
-
+	fmt.Println("=== introduction")
 	// This syntax creates a new struct.
 	fmt.Println(person{"Bob", 20})
 
 	// You can name the fields when initializing a struct.
+	// This is better since its more resilient to field order change.
 	fmt.Println(person{name: "Alice", age: 30})
 
 	// Omitted fields will be zero-valued.
@@ -24,22 +25,24 @@ func main() {
 	fmt.Println(&person{name: "Ann", age: 40})
 
 	// Access struct fields with a dot.
-	fmt.Println("=== s =======")
-	// s is not pointer
+	fmt.Println("=== s")
 	s := person{name: "Sean", age: 50}
 	fmt.Println(s) // => {Sean 50}
-
-	// proper way
+	// passing pointer
+	fmt.Println(s.name)    // => Sean
+	fmt.Println(&s.name)   // => 0x2081c60e0
 	fmt.Println((&s).name) // => Sean
-
-	// if 's' is not pointer, compler automatically
-	// treat as s is pointer so either way is legal
-	fmt.Println(s.name) // => Sean
 
 	// You can also use dots with struct pointers - the
 	// pointers are automatically dereferenced.
 	sp := &s
 	fmt.Println(sp.age) // 50
+
+	// following line cause error, trying to dereferencing `sp.age`
+	// but sp.age's type is int `50` not pointer(storing address of memory)
+	// fmt.Println(*sp.age)
+
+	fmt.Println((*sp).age) // 50
 
 	fmt.Println("=== p_s =======")
 	// p_s is pointer
@@ -47,17 +50,24 @@ func main() {
 	fmt.Println(p_s) //=> &{Sean 50}
 
 	// s_p is pointer
-	fmt.Println(p_s.name) //=> Sean
+	// when you use, dot(.) operator against struct, if struct is pointer,
+	// its automatically dereferenced since,
+	// (*p_s).name == p_s.name
+	fmt.Println((*p_s).name) //=> Sean
+	fmt.Println(p_s.name)    //=> Sean
 
 	// p_s is pointer, if you try to pointerize further
-	// it mean pionter to pointer to p_s cause error
+	// it mean pointer to p_s(this also pointer) cause error
 	// so this **p_s have no field of 'name' cause compile err
 	// fmt.Println((&p_s).name)
 
+	// but with `.`, cause one level dereference, following code is work
+	fmt.Println((*(&p_s)).name)  // Sean
+	fmt.Println((**(&p_s)).name) // Sean
+
 	fmt.Println(&p_s) //=> 0x2081b0020
 	pp_s := &p_s
-	fmt.Println(*pp_s) //=> &{Sean 50}
-
+	fmt.Println(*pp_s)  //=> &{Sean 50}
 	fmt.Println(**pp_s) //=> {Sean 50}
 
 	// following code cause error because of affinity
