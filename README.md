@@ -37,7 +37,7 @@ type Stringer interface {
 
 # Pointer
 ポインタはちゃんと理解しないといけない。  
--function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)- そんな事無い。
+~~function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)~~ そんな事無い。
 
 # Channel
 関数の引数でチャネルを受け取るとき、宣言方法がいろいろあるけどどうちがうのか？  
