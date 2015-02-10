@@ -4,7 +4,11 @@ memo in self learning
 # Reference
 
 * [An Introduction to Programming in Go](http://www.golang-book.com)
+* [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
 * [Go by Example](https://gobyexample.com)
+
+# 全体
+[An Introduction to Programming in Go](http://www.golang-book.com) は言葉が正確で、channel なり、goroutine なりslice なりの説明が非常に簡潔かつ正確なので、ある程度理解した後に再読しても、新たな発見があるはず。  
 
 # 依存 package のチェック？
 
@@ -33,7 +37,7 @@ type Stringer interface {
 
 # Pointer
 ポインタはちゃんと理解しないといけない。  
-function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)  
+-function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)- そんな事無い。
 
 # Channel
 関数の引数でチャネルを受け取るとき、宣言方法がいろいろあるけどどうちがうのか？  
