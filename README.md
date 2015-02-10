@@ -39,6 +39,12 @@ type Stringer interface {
 ポインタはちゃんと理解しないといけない。  
 ~~function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)~~ そんな事無い。
 
+custom type の method 定義時、Ponter を受け取るべきか？そもそも関数の引数に Pointer を受け取るべきか？
+大体常に Pointer で受け取る様にしとけばいいんじゃないか？スタックへのコピーも発生しないのでパフォーマンス的にも
+良いし、function(or method) が引数のフィールドを書き換えたい時も、コピーだと意味ないし、、、
+という考え方がある。大体これでよいが、[CodeReviewComments#pass-values](https://github.com/golang/go/wiki/CodeReviewComments#pass-values) ではより突っ込んで検討していて、Value 渡しの方が、Pointer 渡しより適切なケースを上げている。  
+でも、やはりこれは結構ややこしいから状況によるし、、結局最後に `Finally, when in doubt, use a pointer receiver.`(最後に、確信がなければPointer をレシーバにしろ) って言ってる。  
+
 # Channel
 関数の引数でチャネルを受け取るとき、宣言方法がいろいろあるけどどうちがうのか？  
 
