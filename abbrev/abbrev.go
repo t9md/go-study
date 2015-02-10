@@ -1,8 +1,8 @@
 package abbrev
 
-// New retrurn abbrev map form abbrev to non-abbrev strings.
-// ex) New(["abc", "def"])
-//   => map[def:def abc:abc a:abc ab:abc d:def de:def]
+// New generate abbrev map from `words` and return map from abbrev to word string.
+// ex) abbrev.New([]string{"ab", "cd"})
+//   => map[string]string{"ab":"ab", "a":"ab", "c":"cd", "cd":"cd"}
 func New(words []string) map[string]string {
 	s := ""
 	m := make(map[string]int)
@@ -22,6 +22,7 @@ func New(words []string) map[string]string {
 			delete(table, k)
 		}
 	}
+	// Even if word is part of other longer word, shorter one should always prioritized.
 	for _, word := range words {
 		table[word] = word
 	}

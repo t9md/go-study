@@ -26,7 +26,7 @@ func main() {
 	}
 	table := abbrev.New(words)
 	fmt.Println(abbrev.New([]string{"abc", "def"}))
-	os.Exit(0)
+	// os.Exit(0)
 	// fmt.Println(abbrev_table)
 	var input string
 	for {
