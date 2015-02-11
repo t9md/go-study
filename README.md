@@ -46,7 +46,7 @@ type Stringer interface {
 # Pointer
 ポインタはちゃんと理解しないといけない。  
 ~~function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)~~  ~~そんな事無い。~~
-やっぱそんなことある。 map, slice はポインタ渡す必要なし、勝手に Pointer
+やっぱそんなことある。 map, slice はポインタ渡す必要なし、元々 Pointer
 
 custom type の method 定義時、Ponter を受け取るべきか？そもそも関数の引数に Pointer を受け取るべきか？
 大体常に Pointer で受け取る様にしとけばいいんじゃないか？スタックへのコピーも発生しないのでパフォーマンス的にも
