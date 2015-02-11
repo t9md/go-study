@@ -3,9 +3,17 @@ memo in self learning
 
 # Reference
 
-* [An Introduction to Programming in Go](http://www.golang-book.com)
+## By Google
+* [A Tour of Go](https://tour.golang.org/welcome/1)
+* [How to Write Go Code](https://golang.org/doc/code.html)
+* [The Go Programming Language Specification](https://golang.org/ref/spec)
+* [Effective Go](https://golang.org/doc/effective_go.html)
 * [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+
+## Other
+* [An Introduction to Programming in Go](http://www.golang-book.com)
 * [Go by Example](https://gobyexample.com)
+
 
 # 全体
 [An Introduction to Programming in Go](http://www.golang-book.com) は言葉が正確で、channel なり、goroutine なりslice なりの説明が非常に簡潔かつ正確なので、ある程度理解した後に再読しても、新たな発見があるはず。  
@@ -37,7 +45,8 @@ type Stringer interface {
 
 # Pointer
 ポインタはちゃんと理解しないといけない。  
-~~function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)~~ そんな事無い。
+~~function, map, slice は参照タイプなので、ポインタ渡す必要なし(??? need check)~~  ~~そんな事無い。~~
+やっぱそんなことある。 map, slice はポインタ渡す必要なし、勝手に Pointer
 
 custom type の method 定義時、Ponter を受け取るべきか？そもそも関数の引数に Pointer を受け取るべきか？
 大体常に Pointer で受け取る様にしとけばいいんじゃないか？スタックへのコピーも発生しないのでパフォーマンス的にも
@@ -186,6 +195,10 @@ members := make([]*Member, len(nodes))
 何のスライスだろう？`*` に出会い、pointer か、何への Pointer か、あ、Member がその先に入ってるのね。。。  
 という、前→後への自然な直読が出来る様になること、その後、塊として瞬間的に理解できるようになる。  
 これは、英語の語学学習と同じ話。  
+
+# new() と make()
+new() は Pointer を返す。
+make() はmake した型 T のインスタンスそのものを返す。
 
 # builtin
 
