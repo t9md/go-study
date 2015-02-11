@@ -26,6 +26,13 @@ go list ...
 * カレントディレクトリ配下
 go list ./...
 
+## package
+
+package で構成される
+package 宣言はファイルの最初に来る。
+package name はそのファイルの filepath の basename (=ディレクトリ名)
+にするのがしきたり。
+
 # Interface
 Interface は method セットをグルーピングした型。  
 method 群ということは、つまり振る舞いセットを定義した型。  
@@ -204,4 +211,46 @@ make() はmake した型 T のインスタンスそのものを返す。
 
 # import
 
-# aa
+```Go
+import "fmt"
+import "math/cmplx"
+```
+
+   ↓
+
+```Go
+import(
+  "fmt"
+  "math/cmplx"
+)
+```
+
+```Go
+import(
+  . "fmt" // dot をつけると、Println("hoge") の様にprefix(fmt.) 無しで呼べる
+  "math/cmplx"
+)
+```
+
+```Go
+const f = "%T(%v)\n" // 定数は `const` keyword をつける。
+constant に `:=` による型推論は使えない
+```
+
+毎回 var 付けなくても、次のようにまとめられる
+```Go
+var (
+	ToBe   bool       = false
+	MaxInt uint64     = 1<<64 - 1
+	z      complex128 = cmplx.Sqrt(-5 + 12i)
+)
+```
+
+
+# ゼロ値初期化
+
+explicit initial value で初期化しなかった変数は、ゼロ的な値で初期化される
+  0 for numeric
+  false for boolean
+  "" for strings
+
