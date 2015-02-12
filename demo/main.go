@@ -1,6 +1,9 @@
 /*
 Here I demonstrate several aspect of Go's language characteristics, which I got
 from effective-go and other documents.
+
+This is excutable code with descriptive function name.
+These functions give me good refresher to recap language specifications.
 */
 package main
 
@@ -19,7 +22,14 @@ func opt(options ...int) []int {
 	return options
 }
 
-func howDeferWorks() {
+// NoExpectation interface is the interface allways suffice for any type T.
+type NoExpectation interface{}
+
+func AnyTypeOfArgmeentIsOK(v ...NoExpectation) {
+	pp(v)
+}
+
+func HowDeferWorks() {
 	p("-normal")
 	for i := 0; i < 5; i++ {
 		fmt.Printf("%d ", i)
@@ -38,7 +48,7 @@ func _return(_type string) interface{} {
 	}[_type]
 }
 
-func typeSwitchIdiom(_type string) {
+func TypeSwitchIdiom(_type string) {
 	var t interface{}
 	t = _return(_type)
 	switch t := t.(type) {
@@ -58,7 +68,7 @@ func typeSwitchIdiom(_type string) {
 	pp(t)
 }
 
-func interestingOnlyKey() {
+func InterestingOnlyKey() {
 	a := [...]int{1, 2, 3}
 	for i := range a {
 		println(i)
@@ -69,18 +79,13 @@ func interestingOnlyKey() {
 	}
 }
 
-func howAbbrevWorks() {
+func HowAbbrevWorks() {
 	v := abbrev.New([]string{"ab", "cd"})
 	pp(v)
 }
 
-func typeWithStringRepresentation() {
-	state := Running
-	pp(state)
-	fmt.Println(state)
-}
-
-// Idiom: State have string representation of its value.
+// Idiom: Type State have string representation of its value.
+// String() is automatically invoked withing fmt.Println().
 type State int
 
 const (
@@ -97,6 +102,12 @@ func (s State) String() string {
 	default:
 		return "Unknown"
 	}
+}
+
+func TypeWithStringRepresentation() {
+	state := Running
+	pp(state)
+	fmt.Println(state)
 }
 
 // [effective-go]
@@ -134,16 +145,27 @@ func ArrayIsCopiedOnAssignment() {
 	pp(b) // here b is intact by change of a
 }
 
+func TypeCastToInt(v interface{}) {
+	// invalid operation: v + 1 (mismatched types interface {} and int)
+	// fmt.Println(v + 1)
+
+	fmt.Println(v.(int) + 1)
+}
+
+type CustomInt int
+
 func main() {
-	// howAbbrevWorks()
-	// howDeferWorks()
-	// typeSwitchIdiom("string")
-	// typeSwitchIdiom("bool")
-	// interestingOnlyKey()
-	// typeWithStringRepresentation()
+	// HowAbbrevWorks()
+	// HowDeferWorks()
+	// TypeSwitchIdiom("string")
+	// TypeSwitchIdiom("bool")
+	// InterestingOnlyKey()
+	// TypeWithStringRepresentation()
 	// CompositeLiteral()
 	// ArrayAndSlice()
 	// ArrayIsCopiedOnAssignment()
+	// AnyTypeOfArgmeentIsOK(1, 1.5, "string", true, func() {}, []byte("byte"))
+	// TypeCastToInt(1)
 
 	os.Exit(0)
 }
