@@ -3,16 +3,18 @@ memo in self learning
 
 # Reference
 
-## By Google
+## Official
 * [A Tour of Go](https://tour.golang.org/welcome/1)
 * [How to Write Go Code](https://golang.org/doc/code.html)
 * [The Go Programming Language Specification](https://golang.org/ref/spec)
 * [Effective Go](https://golang.org/doc/effective_go.html)
 * [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments)
+* [FAQ](https://github.com/astaxie/build-web-application-with-golang)
 
 ## Other
 * [An Introduction to Programming in Go](http://www.golang-book.com)
 * [Go by Example](https://gobyexample.com)
+* [build web application with golang](https://github.com/astaxie/build-web-application-with-golang)
 
 
 # 全体
@@ -35,10 +37,10 @@ package name はそのファイルの filepath の basename (=ディレクトリ
 
 # Interface
 Interface は method セットをグルーピングした型。  
-method 群ということは、つまり振る舞いセットを定義した型。  
+method 群ということは、つまり振る舞いセットを定義した型と言える。  
 引数で interface 型を受け取る時、受け取る 変数の'振る舞いへの期待' を表明している。  
 
-Interface-A 型の変数には、Interface-A を満たす(=期待に答える) 変数は全て格納可能。  
+Interface-A 型の変数には、Interface-A を満たす(=satisfy, 期待に答える) 変数は全て格納可能。  
 Interface 型の変数は、この変数は"こういった目的で使いますよ" と表明していると言える。  
 例えば Stringer Interface の定義は以下の通りだが  
 
@@ -48,7 +50,8 @@ type Stringer interface {
 }
 ```
 
-` var s Stringer = var1` だと、ver1 は var1.String() が呼ばれる事を覚悟して置かなければならない。 
+` var s Stringer = var1` だと、ver1 は var1.String() が呼ばれる事を覚悟しておかなければならない。 
+→ "覚悟する" というか、String() メソッドが定義されていなければ、型チェックで弾かれる。
 
 # Pointer
 ポインタはちゃんと理解しないといけない。  
@@ -205,7 +208,18 @@ members := make([]*Member, len(nodes))
 
 # new() と make()
 new() は Pointer を返す。
-make() はmake した型 T のインスタンスそのものを返す。
+make() はmake した型 T 自体を返す。
+
+```Go
+func new(Type) *Type
+```
+```Go
+func make(Type, size IntegerType) Type
+```
+
+# Tips
+[effective-goではない何か](http://yoppi.hatenablog.com/entry/2014/01/07/084154)
+
 
 # builtin
 
@@ -253,4 +267,70 @@ explicit initial value で初期化しなかった変数は、ゼロ的な値で
   0 for numeric
   false for boolean
   "" for strings
+
+# effective-go メモ
+
+## Redeclaration and reassignment(再宣言と、再代入の(特例??))
+[redeclaration](https://golang.org/doc/effective_go.html#redeclaration)
+```Go
+f, err := os.Open(name)
+if err != nil {
+    return err
+}
+d, err := f.Stat()
+if err != nil {
+    f.Close()
+    return err
+}
+codeUsing(f, d)
+```
+上記のコードは err が同一スコープで `:=` で代入されているが、これは以下の特例によるもので、この特例は err を上記な様なケースで使うことを可能にするために設けられているようだ。
+`:=` は宣言と代入を同時に行う演算子なので、同一スコープの同じ変数名(identifier)に対して`:=`を２度使うのはだめなはず。しかし、  
+再宣言と、再代入の特例は以下の条件を満たす限り合法である。
+* 既存の変数vと同一スコープで、
+* 再代入する値は既存変数vにassignable(型)であり、
+* 最低、一つ以上の全く新しい変数が存在する時
+つまり、最後の条件は multiple asiginment(多重代入)式で、その内の変数の一つでも完全に新規だったら、`:=` つかっても合法だよ。まあこれは err の再代入を許可できたほうが便利だから設けた特例だよ。
+という理解をした。  
+
+## For
+
+array の index や、map の key にしか興味がなければ以下でOK.
+```Go
+for key := range m {
+    println(key)
+}
+```
+
+## Type switch
+
+`switch` は interface 型変数の動的な型を特定するためにも使うことが出来る。
+このような型switch は、括弧内を `type` にして、type assertion の構文を使う。
+switch の行で、変数代入しておけば、対応する型が代入され、switch 内で使うことが出来る。
+このようなケースで名前を再利用(tを再利用している)するのは、イディオム。
+
+```Go
+var t interface{}
+t = functionOfSomeType()
+switch t := t.(type) {
+default:
+    fmt.Printf("unexpected type %T", t)       // %T prints whatever type t has
+case bool:
+    fmt.Printf("boolean %t\n", t)             // t has type bool
+case int:
+    fmt.Printf("integer %d\n", t)             // t has type int
+case *bool:
+    fmt.Printf("pointer to boolean %t\n", *t) // t has type *bool
+case *int:
+    fmt.Printf("pointer to integer %d\n", *t) // t has type *int
+}
+```
+
+上記で、t を `interface{}` に型定義しているのは、functionOfSomeType() で何が返ってくるか未定だからだ。
+で、一旦何でも代入できる `interface{}` 型の変数で受け取った(代入)した後、type switch で type discover している。  
+`switch t := t.(type) ` の部分で、使っている左の `t` は別に `val`とか`t`じゃない変数名でもよい。これ、イディオムらしいが、例としては混乱するな。。  
+switch の行は完全に別スコープだから、`t` という新規の変数を宣言and代入しているだけで、別に再宣言and再代入ではない。
+interface{} は、中身が何もない interface なので、このインターフェイスは「何の期待もしない」インターフェイスである。
+メソッド呼び出しに対する期待(or要件)がゼロのインターフェイスなので、全ての型がこの、'期待' に答える事が出来る。
+interface{] は存在しているだけでよい、何も出来なくても良い。という究極に寛容な型であるので、どんな型でも代入することが出来きる。  
 
