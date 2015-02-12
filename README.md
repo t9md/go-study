@@ -399,7 +399,7 @@ By the way, the idea of using Write on a slice of bytes is central to the implem
 つまり、メソッドを `func (v *T) meth(){}` の様に定義した時、
 
 1. 型Tの値変数vに対して呼ぶのは間違い。
-2. Pointer to 型Tに対して呼ぶのが正しい。
+2. (Pointer to T)型に対して呼ぶのが正しい。
 3. 便利な例外として v が addressable であれば、勝手にコンパイラが&を挿入して1のミスを修正してくれる。
 
 
