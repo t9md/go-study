@@ -406,7 +406,7 @@ By the way, the idea of using Write on a slice of bytes is central to the implem
 ```Go
 type T byte[]
 v := T{}
-v.meth()    // 1の間違い。v は値(value)なので Pointer method を呼んでいる。
+v.meth()    // 1であげた間違い。v は値(value)なのに Pointer method を呼んでいる。
 (&v).meth() // 2. これが正しい。レシーバもPointerだからPointer method が呼べる。
 v.meth()    // しかし、3の"優しい" 例外によって、コンパイラが(&).meth() にして実行してくれる
 ```
