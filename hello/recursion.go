@@ -5,36 +5,54 @@ import (
 	"strings"
 )
 
+// Indent is used to keep track of depth of recursive call
 type Indent struct {
-	unit int
-	char string
-	size int
+	base  string
+	depth int
 }
 
 func (i *Indent) String() string {
-	return strings.Repeat(i.char, i.size)
-}
-func (i *Indent) Indent() {
-	i.size = i.size + i.unit
-}
-func (i *Indent) UnIndent() {
-	i.size = i.size - i.unit
+	return strings.Repeat(i.base, i.depth)
 }
 
 func fact(n int, i *Indent) int {
-	i.Indent()
-	fmt.Printf("%s %d: called\n", i, n)
+	fmt.Printf("%s%d: enter\n", i, n)
+
 	if n == 0 {
+		fmt.Printf("%s%d: leave\n", i, n)
 		return 1
 	}
+
+	i.depth += 1
 	answer := fact(n-1, i)
-	fmt.Printf("%s %d: returned\n", i, n-1)
-	i.UnIndent()
+	i.depth -= 1
+	fmt.Printf("%s%d: leave\n", i, n)
 	return n * answer
 }
 
+// By power of defer, easily visualizable for depth of recursive call.
+// Without depending on Indent custom type.
+// This idea is borrowed from effective-go
+func trace(n, depth int) (int, int) {
+	fmt.Printf("%s%d: enter\n", strings.Repeat("  ", depth), n)
+	return n, depth
+}
+func un(n, depth int) {
+	fmt.Printf("%s%d: leave\n", strings.Repeat("  ", depth), n)
+}
+
+func factWithDefer(n, depth int) int {
+	defer un(trace(n, depth))
+	if n == 0 {
+		return 1
+	}
+	return n * factWithDefer(n-1, depth+1)
+}
+
 func main() {
-	fmt.Println(fact(7, &Indent{char: " ", unit: 2, size: 2}))
+	fmt.Println(fact(7, &Indent{base: "  ", depth: 0}))
+	fmt.Println("----------")
+	fmt.Println(factWithDefer(7, 0))
 }
 
 /*

@@ -332,5 +332,85 @@ case *int:
 switch の行は完全に別スコープだから、`t` という新規の変数を宣言and代入しているだけで、別に再宣言and再代入ではない。
 interface{} は、中身が何もない interface なので、このインターフェイスは「何の期待もしない」インターフェイスである。
 メソッド呼び出しに対する期待(or要件)がゼロのインターフェイスなので、全ての型がこの、'期待' に答える事が出来る。
-interface{] は存在しているだけでよい、何も出来なくても良い。という究極に寛容な型であるので、どんな型でも代入することが出来きる。  
+interface{} は存在しているだけでよい、何も出来なくても良い。という究極に寛容な型であるので、どんな型でも代入することが出来きる。  
 
+
+## Pointer vs Value
+理解したいので全部訳してみる。
+[Effective Go 日本語訳](http://go.shibu.jp/effective_go.html#vs) を参考にしたが、とんんでもなく間違っている。英語の原語で読まないとエラく損をする、という良い例だな。
+技術翻訳は、きれいな日本語でなくても良いから、意味を少しも捨てないように努力して訳す必要がある。
+日本語訳はこの部分しか見ていないが、苦手でも英語直で読むほうが結局近道だ。
+
+Pointers vs. Values
+ポインタ vs 値
+
+As we saw with ByteSize, methods can be defined for any named type (except a pointer or an interface); the receiver does not have to be a struct.
+ByteSize で我々が見てきた様に、メソッドはどんな名付けられた型(以下named type)(ポインタとインターフェイスを除く)に対しても定義することが出来る。レシーバは struct である必要はない。
+
+
+In the discussion of slices above, we wrote an Append function. We can define it as a method on slices instead. To do this, we first declare a named type to which we can bind the method, and then make the receiver for the method a value of that type.
+上述のsliceの議論に於いて、我々は Append 関数を書いた。これをslice のメソッドとして定義する事も出来る。そうするには、最初にメソッドを紐付ける型を、named type として宣言し、つぎに、そのメソッドのレシーバをその型の値にする。
+
+```Go
+type ByteSlice []byte
+
+func (slice ByteSlice) Append(data []byte) []byte {
+    // Body exactly the same as above
+}
+```
+This still requires the method to return the updated slice. We can eliminate that clumsiness by redefining the method to take a pointer to a ByteSlice as its receiver, so the method can overwrite the caller's slice.
+これではしかし、まだメソッドから更新したスライスを返す必要がある。この煩雑さを解消するには、メソッド再定義して、ByteSlice へのポインタをレシーバとして受け取るようにするこだ。そうすればメソッドは呼び出し側のスライスを更新(overwrite)できる。
+
+```Go
+func (p *ByteSlice) Append(data []byte) {
+    slice := *p
+    // Body as above, without the return.
+    *p = slice
+}
+```
+In fact, we can do even better. If we modify our function so it looks like a standard Write method, like this,
+実際のところ、もっとよく出来る。関数を標準の Write メソッドと同じになるように書き換える、こんな風に。
+
+```Go
+func (p *ByteSlice) Write(data []byte) (n int, err error) {
+    slice := *p
+    // Again as above.
+    *p = slice
+    return len(data), nil
+}
+```
+then the type `*ByteSlice` satisfies the standard interface io.Writer, which is handy. For instance, we can print into one.
+こうすると、`*ByteSlice` は io.Write の標準インターフェイスを充足するから、使い勝手がよくなる。例えば print で書き込むことも出来る。
+```Go
+    var b ByteSlice
+    fmt.Fprintf(&b, "This hour has %d days\n", 7)
+
+```
+We pass the address of a ByteSlice because only `*ByteSlice` satisfies io.Writer. The rule about pointers vs. values for receivers is that value methods can be invoked on pointers and values, but pointer methods can only be invoked on pointers.
+我々はここで、ByteSlice のアドレスを渡した。理由は io.Writer (のインターフェイス)を満たしているのは `*ByteSlice` のみだからだ。レシーバの"ポインタ vs 値"についての規則はこうだ。value メソッドはポインタに対しても、値(value)に対しても呼び出せるが、ポインタメソッドはポインタに対してのみ呼び出せる。
+
+This rule arises because pointer methods can modify the receiver; invoking them on a value would cause the method to receive a copy of the value, so any modifications would be discarded. The language therefore disallows this mistake. There is a handy exception, though. When the value is addressable, the language takes care of the common case of invoking a pointer method on a value by inserting the address operator automatically. In our example, the variable b is addressable, so we can call its Write method with just b.Write. The compiler will rewrite that to (&b).Write for us.
+ポインタメソッドがレシーバを書き換える事が出来るから、こういう規則がある。つまり、これら(ポインタメソッド)を値に対して呼び出せてしまうと、メソッドは値のコピーを受け取るから、どんな変更も破棄されるだろう。そこで言語レベルで、このミスを許していないのだ。ただ、便利な例外規則がある。値がアドレスを特定できる類のものであれば(値がaddressableであれば), ポインタメソッドを値に対して呼び出す一般的なケースを、言語がケアして、自動でアドレス演算子(&)を挿入する。我々の例でいうと、変数 b は adressable だから、メソッド Write は、単に b.Write でも呼び出せる。コンパイラが我々のために、(&b).Write に書き換えてくれる。
+
+By the way, the idea of using Write on a slice of bytes is central to the implementation of bytes.Buffer.
+とにかく、byte のslice に対して、Write を使うアイデアは、 bytes.Buffer 実装の根幹だ。
+
+### 感想
+つまり、メソッドを `func (v *T) meth(){}` の様に定義した時、
+1. 型Tの値変数vに対して呼ぶのは間違い。
+2. Pointer to 型Tに対して呼ぶのが正しい。
+3. 便利な例外として v が addressable であれば、勝手にコンパイラが&を挿入して1のミスを修正してくれる。
+
+具体的に 1の間違いの例は以下。v はポインタではなく、値なのに、値に対してポインタメソッドを読んでいる。
+```Go
+type T byte[]
+v := T{}
+v.meth() // 1の間違い。v は値なのに、Pointer method である meth() を呼んでいる。
+(&v).meth() // 2. これが正しい。レシーバもPointerだからPointer method が呼べる。
+v.meth() // しかし、3の"優しい" 例外によって、コンパイラが(&).meth() にして実行してくれる
+```
+3. の便利なケアが、個人的には好きではない。曖昧な理解でも動いてしまうと、ミスを指摘されることで学習する機会が奪われているようだ。しかし、毎回&をつけるのは面倒だから、つけたんだろう。しかし
+* 本当は変だけど、便利のためにコンパイラがやってくれていると知っていて使う
+のと、
+* 経験から、これが正しいと(まちがった)理解をして使う
+のとでは大違い。どちらも動く。しかし後者は正しくはないし、コンパイラのケアに対して無知なので間抜けだ。
