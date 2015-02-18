@@ -1,5 +1,5 @@
 # What's This?
-memo in self learning
+Golang self study notes
 
 # Reference
 

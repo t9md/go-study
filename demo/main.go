@@ -12,7 +12,7 @@ import (
 	"os"
 
 	"github.com/kr/pretty"
-	"github.com/t9md/go-learn/abbrev"
+	"github.com/t9md/go-study/abbrev"
 )
 
 var pp = pretty.Println

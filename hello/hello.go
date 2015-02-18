@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/t9md/go-learn/stringutil"
+	"github.com/t9md/go-study/stringutil"
 )
 
 func main() {

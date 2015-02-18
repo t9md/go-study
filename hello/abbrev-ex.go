@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/t9md/go-learn/abbrev"
+	"github.com/t9md/go-study/abbrev"
 )
 
 func main() {
